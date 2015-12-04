@@ -5,7 +5,7 @@
 install_wifi_dependencies(){
     print_status "Installing WiFi tools and dependencies..."
     pacman_upgrade
-    sudo pacman -Sy linux-headers base-devel
+    sudo pacman -Sy linux-headers base-devel svn ruby
 }
 
 install_patched_wireless_db(){
@@ -30,7 +30,7 @@ install_patched_wireless_db(){
     cd ../crda-ct
     make && sudo make install
 
-    print_status "5) Cleanup.."
+    print_status "5) Cleaning up.."
     cd /tmp
     rm -rf crda-ct
     rm -rf wireless-db
@@ -38,23 +38,28 @@ install_patched_wireless_db(){
 
 # https://forums.kali.org/showthread.php?25715-How-to-install-Wifite-mod-pixiewps-and-reaver-wps-fork-t6x-to-nethunter
 install_wifite_fork(){
+    print_status "Installing latest Wifite with PixieWPS..."
     cd /tmp
 
+    print_status "1) Cloning repos..."
     git clone https://github.com/derv82/wifite.git
     git clone https://github.com/aanarchyy/wifite-mod-pixiewps.git
     git clone https://github.com/t6x/reaver-wps-fork-t6x.git
     git clone https://github.com/wiire/pixiewps.git
 
+    print_status "2) Making PixieWPS and Reaver..."
     cd pixiewps/src/
     make && sudo make install
     cd /tmp/reaver-wps-fork-t6x/src/
     ./configure && make && make install
 
+    print_status "3) Installing Wifite-ng..."
     sudo cp /tmp/wifite/wifite.py /usr/bin/wifite-old
     sudo chmod +x /usr/bin/wifite-old
     sudo cp /tmp/wifite-mod-pixiewps/wifite-ng /usr/bin/wifite-ng
     sudo chmod +x /usr/bin/wifite-ng
 
+    print_status "4) Cleaning up.."
     cd /tmp
     rm -rf wifite
     rm -rf wifite-mod-pixiewps
@@ -63,33 +68,37 @@ install_wifite_fork(){
 }
 
 install_lorcon(){
-    echo "Installing Lorcon"
+    echo "Installing Lorcon..."
     cd /tmp
     git clone https://github.com/0x90/lorcon
     cd lorcon
     ./configure && make && make install
 
     # install pylorcon
-    echo "Install pylorcon2"
+    echo "1) Installing pylorcon2..."
     cd pylorcon2
-    python2 setup.py build && python2 setup.py install
+    sudo python2 setup.py build && sudo python2 setup.py install
 
     # to make lorcon available to metasploit
-    echo "Install ruby lorcon"
+    echo "2) Installing ruby lorcon..."
     cd ../ruby-lorcon/
     ruby extconf.rb
     make && make install
+
+    print_status "3) Cleaning up.."
+    rm -rf /tmp/pylorcon2
 }
 
 install_pyrit(){
-    sudo pacman -Syyu nvidia-cuda-toolkit nvidia-opencl-icd
+#    sudo pacman -Syyu nvidia-cuda-toolkit nvidia-opencl-icd
+    print_status "Installing Pyrit..."
 
-    echo "Step 3.a: Install Pyrit prerequisites"
-    apt-get install python2.7-dev python2.7-libpcap libpcap-dev
-    echo "Step 3.b: Remove existing installation of Pyrit"
-    apt-get remove pyrit
+    print_status "1) Installing Pyrit prerequisites..."
+    sudo pacman -Sy python2 python2-pylibpcap libpcap
+    print_status "2) Removing existing Pyrit..."
+    sudo pacman -R remove pyrit
 
-    echo "Step 2: Download Pyrit and Cpyrit"
+    echo "3) Downloading Pyrit and Cpyrit..."
     cd /usr/src
     wget https://pyrit.googlecode.com/files/pyrit-0.4.0.tar.gz
     wget https://pyrit.googlecode.com/files/cpyrit-cuda-0.4.0.tar.gz
@@ -97,11 +106,20 @@ install_pyrit(){
 
 install_horst(){
     # http://br1.einfach.org/tech/horst/
+    print_status "Installing horst..."
+
+    print_status "1) Installing horst prerequisites..."
     sudo pacman -Syyu ncurses libnl1 libnl
+
+    print_status "2) Cloning repos..."
     cd /tmp
     git clone git://br1.einfach.org/horst
+
+    print_status "3) Making horst and installing..."
     cd horst
     make && cp horst /usr/bin
+
+    print_status "4) Cleaning up.."
     rm -rf /tmp/horst
 }
 
