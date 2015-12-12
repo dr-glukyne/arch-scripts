@@ -15,7 +15,7 @@ install_patched_wireless_db(){
     print_status "1) Cloning repos.."
     cd /tmp
     git clone https://github.com/dr-glukyne/crda-ct
-    git clone https://github.com/0x90/wireless-regdb
+    git clone https://github.com/dr-glukyne/wireless-regdb
 
 
     print_status "2) Building and installing dependencies for building wireless-db"
